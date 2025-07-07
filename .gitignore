@@ -1,0 +1,24 @@
+# Unity 自动生成目录
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+UserSettings/
+MemoryCaptures/
+
+# 具体项目路径
+baseLearning/Base_URP/Library/
+baseLearning/Base_URP/Temp/
+baseLearning/Base_URP/Obj/
+baseLearning/Base_URP/Build/
+baseLearning/Base_URP/Logs/
+baseLearning/Base_URP/UserSettings/
+
+baseLearning/Base_Build_In/Library/
+baseLearning/Base_Build_In/Temp/
+baseLearning/Base_Build_In/Obj/
+baseLearning/Base_Build_In/Build/
+baseLearning/Base_Build_In/Logs/
+baseLearning/Base_Build_In/UserSettings/
