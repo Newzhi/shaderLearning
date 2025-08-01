@@ -108,7 +108,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _Displacement: 0.3
     - _DisplacementScale: 1.05
-    - _DisplacementStrength: 0.21
+    - _DisplacementStrength: 0
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EdgeLength: 50
@@ -141,7 +141,7 @@ Material:
     - _TessLevelOuter2: 1
     - _TessLevelOuter3: 1
     - _TessellationDistance: 1
-    - _TessellationFactor: 6.2
+    - _TessellationFactor: 6.5
     - _TessellationLevel: 4
     - _TessellationType: 1
     - _WorkflowMode: 1
