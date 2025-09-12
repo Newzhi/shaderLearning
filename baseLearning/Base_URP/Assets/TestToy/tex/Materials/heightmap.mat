@@ -28,20 +28,20 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: ebb34a44c1fbfef4382172465e3db481, type: 3}
+        m_Texture: {fileID: 10307, guid: 0000000000000000f000000000000000, type: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 66a9d1fbe3bc4cd4997b430fc7edcbb7, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _DisplacementScale: 0.1
-    - _DisplacementStrength: 0.55
+    - _DisplacementScale: 0.22
+    - _DisplacementStrength: 0.532
     - _Metallic: 0
     - _Smoothness: 0
-    - _TessellationFactor: 5.81
+    - _TessellationFactor: 14
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
