@@ -9,7 +9,7 @@ Shader "Custom/URPBasicTemplate"
         //翻页效果设置属性
         _RotateAngle("RotateAngle",Range(0,180)) = 5 //翻页角度
         _RotateOffset("RotateOffset",Vector) = (5,0,0,0) //旋转偏移量
-        
+        _Wave("wave",Float) = 0.5
     }
 
     SubShader
@@ -32,6 +32,7 @@ Shader "Custom/URPBasicTemplate"
                 float4 _FrontTex_ST;
                 float4 _BackTex_ST;
                 float _RotateAngle;
+                float _Wave;
                 float4 _RotateOffset;
             CBUFFER_END
 
@@ -62,7 +63,7 @@ Shader "Custom/URPBasicTemplate"
                     0,0,0,1,
                 };
                 IN.positionOS -= _RotateOffset;
-                IN.positionOS.y = sin(IN.positionOS.x * 0.5) * sinx;
+                IN.positionOS.y = sin(IN.positionOS.x * _Wave) * sinx;
                 IN.positionOS = mul(RotateMatria,IN.positionOS);
                 IN.positionOS += _RotateOffset;
                 Varyings OUT;

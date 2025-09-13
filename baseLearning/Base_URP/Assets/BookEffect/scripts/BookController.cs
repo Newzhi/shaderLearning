@@ -1,18 +1,17 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace newbook
+namespace BookEffect
 {
-    public class BookController1 : MonoBehaviour
+    public class BookController : MonoBehaviour
     {
         //按钮
         public Button prev;
         public Button next;
         
         //根节点以及子对象（书页）
-        public GameObject book;
+        private GameObject book;
         private GameObject[] pages;
         private int GameObjectCount;
         
@@ -27,10 +26,14 @@ namespace newbook
         private Texture[] backTex;
         
         //页面间距
-        public float _pageDistance = 0.1f;
+        private float _pageDistance = -0.01f;
+        
+        //翻页速度 点击角度
+        public float FilpAngle = 5f;
         
         //翻页状态标志位
         private bool[] isFlipDone;
+        
         //游标
         private int currentPageIndex = 0;
         
@@ -38,9 +41,26 @@ namespace newbook
         private bool isPrevPressed = false;
         private bool isNextPressed = false;
         private float pressTimer = 0f;
-        private float pressInterval = 0.1f; // 长按间隔时间（秒）
-        
+        public float pressInterval = 0.05f; // 长按间隔时间（秒）
+
+        #region Unity 生命周期
+
         void Start()
+        {
+            InitAll();
+        }
+
+        void Update()
+        {
+            OnBtnClicking();
+        }
+
+        #endregion
+        
+        #region 初始化
+
+        //一次性初始化
+        private void InitAll()
         {
             InitGameObject();
             InitMaterial();
@@ -50,40 +70,15 @@ namespace newbook
             InitBtn();
         }
 
-        void Update()
-        {
-            // 处理长按逻辑
-            if (isPrevPressed || isNextPressed)
-            {
-                pressTimer += Time.deltaTime;
-                
-                if (pressTimer >= pressInterval)
-                {
-                    pressTimer = 0f; // 重置计时器
-                    
-                    if (isPrevPressed)
-                    {
-                        OnPrevBtnClick();
-                    }
-                    else if (isNextPressed)
-                    {
-                        OnNextBtnClick();
-                    }
-                }
-            }
-        }
-
-        #region 初始化
-
-        private void InitAll()
-        {
-            
-        }
-
+        //初始化游戏对象以及每个页面
         private void InitGameObject()
         {
+            book = this.gameObject;
             GameObjectCount = book.transform.childCount;
             pages = new GameObject[GameObjectCount];
+            
+            //TODO 根据资源加载直接加载某个预制体作为书页，不需要人为复制粘贴预制体了
+            //替换下面循环中的赋值语句，设置生成位置即可(需要生成在同一个位置，不然不能自动设置页面间距了)
             
             // 遍历所有子对象并赋值给pages数组
             for (int i = 0; i < GameObjectCount; i++)
@@ -92,6 +87,7 @@ namespace newbook
             }
         }
 
+        //初始化材质
         private void InitMaterial()
         {
             materials = new Material[GameObjectCount];
@@ -102,6 +98,7 @@ namespace newbook
             }
         }
 
+        //初始化页面间距
         private void InitPageDistance()
         {
             for (int i = 0; i < GameObjectCount; i++)
@@ -110,9 +107,9 @@ namespace newbook
             }
         }
         
+        //初始化shader属性获取
         private void InitShaderPropertyGet()
         {
-            // 初始化属性数组
             angle = new float[GameObjectCount];
             offset = new Vector4[GameObjectCount];
             frontTex = new Texture[GameObjectCount];
@@ -128,6 +125,7 @@ namespace newbook
             }
         }
 
+        //为每个页面赋值图片
         private void InitTextures()
         {
             if (textures == null || textures.Length == 0) return;
@@ -153,7 +151,7 @@ namespace newbook
                 }
             }
         }
-
+        //初始化按钮
         private void InitBtn()
         {
             // 为按钮添加EventTrigger组件来实现长按
@@ -161,28 +159,32 @@ namespace newbook
             AddButtonEvents(next, false);
         }
         
+       
+        #endregion
+        
+        #region 按钮点击方法
         // 添加按钮事件
         void AddButtonEvents(Button button, bool isPrevButton)
         {
             // 获取或添加EventTrigger组件
-            var trigger = button.gameObject.GetComponent<UnityEngine.EventSystems.EventTrigger>() ?? 
-                         button.gameObject.AddComponent<UnityEngine.EventSystems.EventTrigger>();
+            var trigger = button.gameObject.GetComponent<EventTrigger>() ?? 
+                          button.gameObject.AddComponent<EventTrigger>();
             
             // 按下事件
-            var pointerDown = new UnityEngine.EventSystems.EventTrigger.Entry();
-            pointerDown.eventID = UnityEngine.EventSystems.EventTriggerType.PointerDown;
+            var pointerDown = new EventTrigger.Entry();
+            pointerDown.eventID = EventTriggerType.PointerDown;
             pointerDown.callback.AddListener((data) => { OnButtonPressed(isPrevButton); });
             trigger.triggers.Add(pointerDown);
             
             // 抬起事件
-            var pointerUp = new UnityEngine.EventSystems.EventTrigger.Entry();
-            pointerUp.eventID = UnityEngine.EventSystems.EventTriggerType.PointerUp;
+            var pointerUp = new EventTrigger.Entry();
+            pointerUp.eventID = EventTriggerType.PointerUp;
             pointerUp.callback.AddListener((data) => { OnButtonReleased(isPrevButton); });
             trigger.triggers.Add(pointerUp);
             
             // 离开事件（防止拖拽时卡住）
-            var pointerExit = new UnityEngine.EventSystems.EventTrigger.Entry();
-            pointerExit.eventID = UnityEngine.EventSystems.EventTriggerType.PointerExit;
+            var pointerExit = new EventTrigger.Entry();
+            pointerExit.eventID = EventTriggerType.PointerExit;
             pointerExit.callback.AddListener((data) => { OnButtonReleased(isPrevButton); });
             trigger.triggers.Add(pointerExit);
         }
@@ -193,12 +195,12 @@ namespace newbook
             if (isPrevButton) 
             {
                 isPrevPressed = true;
-                Debug.Log("上一页按钮按下");
+                //Debug.Log("上一页按钮按下");
             }
             else 
             {
                 isNextPressed = true;
-                Debug.Log("下一页按钮按下");
+                //Debug.Log("下一页按钮按下");
             }
             pressTimer = 0f;
         }
@@ -209,18 +211,14 @@ namespace newbook
             if (isPrevButton) 
             {
                 isPrevPressed = false;
-                Debug.Log("上一页按钮抬起");
+                //Debug.Log("上一页按钮抬起");
             }
             else 
             {
                 isNextPressed = false;
-                Debug.Log("下一页按钮抬起");
+                //Debug.Log("下一页按钮抬起");
             }
         }
-
-        #endregion
-        
-        #region 按钮点击方法
 
         private void OnPrevBtnClick()
         {
@@ -230,13 +228,13 @@ namespace newbook
                 if (currentPageIndex > 0)
                 {
                     currentPageIndex--;
-                    Debug.Log($"游标移动到页面 {currentPageIndex}");
+                    //Debug.Log($"游标移动到页面 {currentPageIndex}");
                 }
             }
             else
             {
                 // 当前页面有角度，继续翻回
-                angle[currentPageIndex] -= 10f;
+                angle[currentPageIndex] -= FilpAngle;
                 angle[currentPageIndex] = Mathf.Clamp(angle[currentPageIndex], 0f, 180f);
                 materials[currentPageIndex].SetFloat("_RotateAngle", angle[currentPageIndex]);
                 
@@ -253,13 +251,13 @@ namespace newbook
                 if (currentPageIndex < GameObjectCount - 1)
                 {
                     currentPageIndex++;
-                    Debug.Log($"游标移动到页面 {currentPageIndex}");
+                    //Debug.Log($"游标移动到页面 {currentPageIndex}");
                 }
             }
             else
             {
                 // 当前页面未完全翻过，继续翻动
-                angle[currentPageIndex] += 10f;
+                angle[currentPageIndex] += FilpAngle;
                 angle[currentPageIndex] = Mathf.Clamp(angle[currentPageIndex], 0f, 180f);
                 materials[currentPageIndex].SetFloat("_RotateAngle", angle[currentPageIndex]);
                 
@@ -284,6 +282,29 @@ namespace newbook
             // 更新位置
             Vector3 currentPos = pages[pageIndex].transform.position;
             pages[pageIndex].transform.position = new Vector3(currentPos.x, newY, currentPos.z);
+        }
+
+        private void OnBtnClicking()
+        {
+            // 处理长按逻辑
+            if (isPrevPressed || isNextPressed)
+            {
+                pressTimer += Time.deltaTime;
+                
+                if (pressTimer >= pressInterval)
+                {
+                    pressTimer = 0f; // 重置计时器
+                    
+                    if (isPrevPressed)
+                    {
+                        OnPrevBtnClick();
+                    }
+                    else if (isNextPressed)
+                    {
+                        OnNextBtnClick();
+                    }
+                }
+            }
         }
         
         #endregion
