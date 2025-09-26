@@ -104,7 +104,8 @@ Shader "URP/RampTex"
                 float3 worldLightDir = normalize(mainLight.direction);
                 
                 // 环境光
-                half3 ambient = SampleSH(half4(worldNormal, 1.0));
+                //half3 ambient = SampleSH(half4(worldNormal, 1.0));
+                half3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
                 
                 // 主光源半兰伯特光照计算
                 half halfLambert = 0.5 * dot(worldNormal, worldLightDir) + 0.5;
@@ -155,6 +156,8 @@ Shader "URP/RampTex"
             Cull Front
             ZWrite On
             ZTest LEqual
+            
+            //ColorMask 0
             
             HLSLPROGRAM
             #pragma vertex vert
