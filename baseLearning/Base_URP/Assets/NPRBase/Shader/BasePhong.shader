@@ -1,58 +1,69 @@
-Shader "Unlit/BaseLighting"
+Shader "Mylit/BasePhong"
 {
     Properties
-    {
+    {         
         _MainTex ("Texture", 2D) = "white" {}
     }
+
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
-
         Pass
         {
-            CGPROGRAM
+            HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
 
-            #include "UnityCG.cginc"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"           
+            
+            CBUFFER_START(UnityPerMaterial)
+                float4 _MainTex_ST;
+            CBUFFER_END
 
-            struct appdata
+            TEXTURE2D(_MainTex);
+            SAMPLER(sampler_MainTex);
+
+            struct Attributes
             {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
+                float4 positionOS : POSITION;
+                float4 normalOS : NORMAL;
+                float4 tangentOS:TANGENT;
+                float4 texcoord : TEXCOORD0;
             };
 
-            struct v2f
+            struct Varyings
             {
+                float4 positionCS : SV_POSITION;
                 float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
+                float3 positionWS : TEXCOORD1;
+                float3 viewDirWS : TEXCOORD2;
+                float3 nornalWS : TEXCOORD3;
+
             };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
-
-            v2f vert (appdata v)
+            Varyings vert(Attributes IN)
             {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
-                return o;
+                Varyings OUT;
+                OUT.positionCS = TransformObjectToHClip(IN.positionOS.xyz);
+                OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
+                OUT.nornalWS = TransformObjectToWorldNormal(IN.normalOS);
+                OUT.viewDirWS = GetCameraPositionWS() - OUT.positionWS;
+                
+                // 使用Unity自带的UV变换函数
+                OUT.uv = TRANSFORM_TEX(IN.texcoord, _MainTex);
+                
+                return OUT;
             }
 
-            fixed4 frag (v2f i) : SV_Target
+            half4 frag(Varyings IN) : SV_Target
             {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
+                Light light = GetMainLight(TransformWorldToShadowCoord(IN.positionWS));
+                half NdotL = saturate(dot(IN.nornalWS, light.direction));
+                half3 Lighting = light.color * NdotL;
+                half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
+                return half4(albedo.rgb * Lighting , albedo.a);
             }
-            ENDCG
+            ENDHLSL
         }
     }
 }

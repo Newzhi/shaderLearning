@@ -35,7 +35,7 @@ Shader "Mylit/BaseLighting"
             struct Varyings
             {
                 float4 positionCS : SV_POSITION;
-                float4 uv : TEXCOORD0;
+                float2 uv : TEXCOORD0;
                 float3 positionWS : TEXCOORD1;
                 float3 viewDirWS : TEXCOORD2;
                 float3 nornalWS : TEXCOORD3;
@@ -49,7 +49,10 @@ Shader "Mylit/BaseLighting"
                 OUT.positionWS = TransformObjectToWorld(IN.positionOS.xyz);
                 OUT.nornalWS = TransformObjectToWorldNormal(IN.normalOS);
                 OUT.viewDirWS = GetCameraPositionWS() - OUT.positionWS;
-                OUT.uv.xyz = IN.normalOS.xyz;
+                
+                // 使用Unity自带的UV变换函数
+                OUT.uv = TRANSFORM_TEX(IN.texcoord, _MainTex);
+                
                 return OUT;
             }
 
@@ -58,7 +61,7 @@ Shader "Mylit/BaseLighting"
                 Light light = GetMainLight(TransformWorldToShadowCoord(IN.positionWS));
                 half NdotL = saturate(dot(IN.nornalWS, light.direction));
                 half3 Lighting = light.color * NdotL;
-                half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv.xy);
+                half4 albedo = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, IN.uv);
                 return half4(albedo.rgb * Lighting , albedo.a);
             }
             ENDHLSL
