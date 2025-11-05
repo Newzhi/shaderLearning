@@ -52,13 +52,17 @@
     <Compile Include="Assets\BookEffect\scripts\BookController.cs" />
     <Compile Include="Assets\Tessellation\scprits\NoiseTextureGeneratorEditor.cs" />
     <None Include="Assets\PostEffect\BlurEffect\GaussianBlur.shader" />
+    <None Include="Assets\CatLikeCode\Lession3\Flow.cginc" />
     <None Include="Assets\Tessellation\shaders\Tessellation.shader" />
     <None Include="Assets\NPRBase\Shader\BaseLighting.shader" />
+    <None Include="Assets\CatLikeCode\Lession3\DirectionalFlow.shader" />
     <None Include="Assets\NPRtest1\Shader\cloth.shader" />
     <None Include="Assets\NPRBase\Shader\BasePhong.shader" />
     <None Include="Assets\Tessellation\shaders\EdgeLight.shader" />
     <None Include="Assets\NPRBase\Shader\BasePBR.shader" />
+    <None Include="Assets\CatLikeCode\Lession3\DistortionFlow.shader" />
     <None Include="Assets\BookEffect\shader\BookShader.shader" />
+    <None Include="Assets\CatLikeCode\Lession3\Waves.shader" />
     <Reference Include="UnityEngine">
       <HintPath>D:\ForUnity\2022.3.62f1c1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
     </Reference>
